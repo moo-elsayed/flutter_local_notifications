@@ -80,7 +80,9 @@ class LocalNotificationService {
           'This channel is used for basic notifications with sound',
       importance: Importance.high,
       priority: Priority.high,
-      playSound: true, // Ensure sound plays
+      playSound: true,
+      // Ensure sound plays
+      sound: RawResourceAndroidNotificationSound('notification_sound'),
     );
 
     const NotificationDetails notificationDetails = NotificationDetails(
