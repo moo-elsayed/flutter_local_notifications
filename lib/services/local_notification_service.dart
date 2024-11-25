@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:developer';
 import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:timezone/timezone.dart' as tz;
@@ -9,12 +10,14 @@ class LocalNotificationService {
   static FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
 
+  static StreamController<NotificationResponse> streamController =
+      StreamController();
+
   // 1.setup
 
-  static onDidReceiveBackgroundNotificationResponse(
-      NotificationResponse details) {}
-
-  static onDidReceiveNotificationResponse(NotificationResponse details) {}
+  static onTap(NotificationResponse notificationResponse) {
+    streamController.add(notificationResponse);
+  }
 
   static Future<void> init() async {
     // Create the notification channel for Android 8.0 and above
@@ -33,9 +36,8 @@ class LocalNotificationService {
 
     await flutterLocalNotificationsPlugin.initialize(
       initializationSettings,
-      onDidReceiveBackgroundNotificationResponse:
-          onDidReceiveBackgroundNotificationResponse,
-      onDidReceiveNotificationResponse: onDidReceiveNotificationResponse,
+      onDidReceiveBackgroundNotificationResponse: onTap,
+      onDidReceiveNotificationResponse: onTap,
     );
 
     // Create and register the notification channel for Android 8.0 and above
@@ -90,7 +92,8 @@ class LocalNotificationService {
     );
 
     await flutterLocalNotificationsPlugin.show(
-        0, 'Basic Notification', 'body', notificationDetails);
+        0, 'Basic Notification', 'body', notificationDetails,
+        payload: 'basic');
 
     log('Notification displayed');
   }
@@ -113,14 +116,15 @@ class LocalNotificationService {
     );
 
     await flutterLocalNotificationsPlugin.periodicallyShow(
-      1, // Notification ID (use a unique ID for each notification)
-      'Repeated Notification', // Notification Title
-      'body', // Notification Body
-      RepeatInterval.everyMinute,
-      // Repeat Interval (you can change this to everyMinute, everyHour, etc.)
-      notificationDetails,
-      androidScheduleMode: AndroidScheduleMode.exact,
-    ); //Allow notification to show even when the app is in the background);
+        1, // Notification ID (use a unique ID for each notification)
+        'Repeated Notification', // Notification Title
+        'body', // Notification Body
+        RepeatInterval.everyMinute,
+        // Repeat Interval (you can change this to everyMinute, everyHour, etc.)
+        notificationDetails,
+        androidScheduleMode: AndroidScheduleMode.exact,
+        payload:
+            'repeated'); //Allow notification to show even when the app is in the background);
 
     log('Notification displayed');
   }
@@ -153,11 +157,12 @@ class LocalNotificationService {
         'scheduled Notification',
         'body',
         // tz.TZDateTime.now(tz.local).add(const Duration(seconds: 10)),
-        tz.TZDateTime(tz.local, 2024, 11, 25, 14, 09),
+        tz.TZDateTime(tz.local, 2024, 11, 25, 16, 59),
         notificationDetails,
         uiLocalNotificationDateInterpretation:
             UILocalNotificationDateInterpretation.absoluteTime,
-        androidScheduleMode: AndroidScheduleMode.exact);
+        androidScheduleMode: AndroidScheduleMode.exact,
+        payload: 'scheduled');
 
     log('Notification displayed');
     log('${tz.local}');
